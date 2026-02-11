@@ -4,10 +4,14 @@ import Item from '@/model/items.model'
 import Category from '@/model/category.model'
 import mongoose from 'mongoose'
 
+type RouteContext = {
+  params: Promise<{ id: string }>
+}
+
 // --- GET SINGLE ITEM (By ID or Name) ---
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } },
+  context: RouteContext,
 ) {
   try {
     await connectDB()
@@ -16,7 +20,7 @@ export async function GET(
     if (!userId || !mongoose.Types.ObjectId.isValid(userId)) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 })
     }
-    const idOrName = params.id // Next.js captures the dynamic route part here
+    const {id: idOrName} =await context.params // Next.js captures the dynamic route part here
 
     let query = {}
     if (mongoose.Types.ObjectId.isValid(idOrName)) {
@@ -44,7 +48,7 @@ export async function GET(
 // --- UPDATE ITEM ---
 export async function PUT(
   req: NextRequest,
-  { params }: { params: { id: string } },
+  context: RouteContext,
 ) {
   try {
     await connectDB()
@@ -54,7 +58,7 @@ export async function PUT(
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 })
     }
 
-    const { id } = params
+    const { id } = await context.params
     const body = await req.json()
     const { name, description, price, stock, categoryId } = body
 
@@ -111,7 +115,7 @@ export async function PUT(
 // --- DELETE ITEM (Soft Delete) ---
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } },
+  context: RouteContext,
 ) {
   try {
     await connectDB()
@@ -120,7 +124,7 @@ export async function DELETE(
     if (!userId || !mongoose.Types.ObjectId.isValid(userId)) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 })
     }
-    const { id } = params
+    const { id } = await context.params
 
     // We use findByIdAndUpdate to perform a "Soft Delete" (setting status to inactive)
     const deletedItem = await Item.findByIdAndUpdate(

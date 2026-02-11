@@ -3,11 +3,12 @@ import connectDB from '@/lib/connectDB'
 import Category from '@/model/category.model'
 import mongoose from 'mongoose'
 
-// --- GET SINGLE CATEGORY (By ID or Name) ---
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { id: string } },
-) {
+type RouteContext = {
+  params: Promise<{ id: string }>
+}
+
+// --- GET SINGLE CATEGORY ---
+export async function GET(req: NextRequest, context: RouteContext) {
   try {
     await connectDB()
     const userId = req.headers.get('x-user-id')
@@ -15,18 +16,17 @@ export async function GET(
     if (!userId || !mongoose.Types.ObjectId.isValid(userId)) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 })
     }
-    const idOrName = params.id // Next.js captures the dynamic segment here
+
+    const { id: idOrName } = await context.params
 
     let query
 
-    // Logic: If valid ObjectId, search by _id, otherwise regex search by name
     if (mongoose.Types.ObjectId.isValid(idOrName)) {
       query = { _id: idOrName }
     } else {
       query = { name: { $regex: `^${idOrName}$`, $options: 'i' } }
     }
 
-    // Note: Ensure your Category model has the 'items' virtual/relationship defined for populate to work
     const category = await Category.findOne(query).populate('items')
 
     if (!category) {
@@ -38,7 +38,6 @@ export async function GET(
 
     return NextResponse.json({ category }, { status: 200 })
   } catch (error: any) {
-    console.error('Error fetching category:', error)
     return NextResponse.json(
       { message: 'Server error', error: error.message },
       { status: 500 },
@@ -47,10 +46,7 @@ export async function GET(
 }
 
 // --- UPDATE CATEGORY ---
-export async function PUT(
-  req: NextRequest,
-  { params }: { params: { id: string } },
-) {
+export async function PUT(req: NextRequest, context: RouteContext) {
   try {
     await connectDB()
     const userId = req.headers.get('x-user-id')
@@ -58,11 +54,11 @@ export async function PUT(
     if (!userId || !mongoose.Types.ObjectId.isValid(userId)) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 })
     }
-    const { id } = params
+
+    const { id } = await context.params
     const body = await req.json()
     const { name, description } = body
 
-    // Build update object dynamically
     const updates: any = {}
     if (name !== undefined) updates.name = name
     if (description !== undefined) updates.description = description
@@ -93,10 +89,7 @@ export async function PUT(
 }
 
 // --- DELETE CATEGORY ---
-export async function DELETE(
-  req: NextRequest,
-  { params }: { params: { id: string } },
-) {
+export async function DELETE(req: NextRequest, context: RouteContext) {
   try {
     await connectDB()
     const userId = req.headers.get('x-user-id')
@@ -104,7 +97,8 @@ export async function DELETE(
     if (!userId || !mongoose.Types.ObjectId.isValid(userId)) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 })
     }
-    const { id } = params
+
+    const { id } = await context.params
 
     const category = await Category.findByIdAndDelete(id)
 

@@ -4,14 +4,20 @@ import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import mongoose from 'mongoose'
 
+type RouteContext = {
+  params: Promise<{ id: string }>
+}
+
+// --- GET USER PROFILE ---
+
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } },
+  context: RouteContext,
 ): Promise<NextResponse> {
   try {
     await connectDB()
     const { username, password } = await request.json()
-    const { id } = await params
+    const { id } = await context.params
 
     const userId = id
 

@@ -3,11 +3,12 @@ import connectDB from '@/lib/connectDB'
 import Sale from '@/model/sales.model'
 import mongoose from 'mongoose'
 
+type RouteContext = {
+  params: Promise<{ id: string }>
+}
+
 // --- GET SINGLE SALE ---
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { id: string } },
-) {
+export async function GET(req: NextRequest, context: RouteContext) {
   try {
     await connectDB()
 
@@ -16,7 +17,7 @@ export async function GET(
     if (!userId || !mongoose.Types.ObjectId.isValid(userId)) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 })
     }
-    const { id } = params
+    const { id } = await context.params
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return NextResponse.json({ message: 'Invalid sale ID' }, { status: 400 })
@@ -38,10 +39,7 @@ export async function GET(
 }
 
 // --- UPDATE SALE ---
-export async function PUT(
-  req: NextRequest,
-  { params }: { params: { id: string } },
-) {
+export async function PUT(req: NextRequest, context: RouteContext) {
   try {
     await connectDB()
 
@@ -50,7 +48,7 @@ export async function PUT(
     if (!userId || !mongoose.Types.ObjectId.isValid(userId)) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 })
     }
-    const { id } = params
+    const { id } = await context.params
     const body = await req.json()
     const { quantity, description } = body
 
@@ -85,10 +83,7 @@ export async function PUT(
 }
 
 // --- DELETE SALE (Soft Delete) ---
-export async function DELETE(
-  req: NextRequest,
-  { params }: { params: { id: string } },
-) {
+export async function DELETE(req: NextRequest, context: RouteContext) {
   try {
     await connectDB()
 
@@ -98,7 +93,7 @@ export async function DELETE(
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 })
     }
 
-    const { id } = params
+    const { id } = await context.params
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return NextResponse.json({ message: 'Invalid sale ID' }, { status: 400 })
