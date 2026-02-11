@@ -86,11 +86,7 @@ export default function ProfilePage() {
         if (user) {
           // We need the token to keep the session valid in the context helper
           const currentToken = localStorage.getItem('token') || ''
-          login({
-            id: user.id,
-            email: user.email, // Email didn't change
-            token: currentToken,
-          })
+          login(currentToken)
         }
 
         // Clear password fields for security

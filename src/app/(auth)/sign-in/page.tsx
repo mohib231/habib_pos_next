@@ -74,13 +74,7 @@ export default function LoginPage() {
         })
 
         // Call login from context, which will fetch the profile (optional)
-        if (data.data?.user) {
-          await login({
-            id: data.data.user.id,
-            email: data.data.user.email,
-            token: token,
-          })
-        }
+        await login(token)
 
         setTimeout(() => {
           router.push('/sales')
