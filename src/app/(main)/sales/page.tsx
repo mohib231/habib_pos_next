@@ -27,6 +27,7 @@ interface ReceiptData {
   date: Date
   cashier: string
   receiptNo: string
+  description?: string
 }
 
 export default function SalesPage() {
@@ -40,6 +41,7 @@ export default function SalesPage() {
     message: string | null
   }>({ type: null, message: null })
   const [lastReceipt, setLastReceipt] = useState<ReceiptData | null>(null)
+  const [description, setDescription] = useState('')
 
   useEffect(() => {
     fetchItems()
@@ -133,7 +135,8 @@ export default function SalesPage() {
             item: item._id,
             quantity: item.quantity,
             totalPrice: item.price * item.quantity,
-            description: `Sale by ${user?.username || 'Cashier'}`,
+            description:
+              description.trim() || `Sale by ${user?.username || 'Cashier'}`,
           }),
         }),
       )
@@ -147,9 +150,11 @@ export default function SalesPage() {
           date: new Date(),
           cashier: user?.username || 'Cashier',
           receiptNo: `RCP-${Date.now()}`,
+          description: description.trim(),
         }
         setLastReceipt(receipt)
         setCart([])
+        setDescription('')
         showStatus('success', 'Sale completed successfully!')
         fetchItems()
       } else {
@@ -165,6 +170,7 @@ export default function SalesPage() {
   const startNewSale = () => {
     setLastReceipt(null)
     setCart([])
+    setDescription('')
   }
 
   const generateReceiptHTML = (receipt: ReceiptData) => {
@@ -212,6 +218,7 @@ export default function SalesPage() {
           <div class="info">
             <div>Date: ${new Date(receipt.date).toLocaleString()}</div>
             <div>Cashier: ${receipt.cashier}</div>
+            ${receipt.description ? `<div style="margin-top: 5px;">Description: ${receipt.description}</div>` : ''}
           </div>
           <div class="items">
             <div style="font-weight: bold; margin-bottom: 8px;">
@@ -498,6 +505,16 @@ export default function SalesPage() {
                         <span className="text-indigo-600">
                           Rs{calculateTotal().toFixed(2)}
                         </span>
+                      </div>
+                      <div>
+                        <h1 className="text-lg font-semibold">Description</h1>
+                        <input
+                          type="text"
+                          className="w-full border border-gray-300 rounded px-3 py-2 mt-1"
+                          placeholder="Enter description"
+                          value={description}
+                          onChange={(e) => setDescription(e.target.value)}
+                        />
                       </div>
                     </div>
 
