@@ -28,6 +28,8 @@ interface ReceiptData {
   cashier: string
   receiptNo: string
   description?: string
+  customer_name?: string
+  customer_phone?: string
 }
 
 export default function SalesPage() {
@@ -42,6 +44,8 @@ export default function SalesPage() {
   }>({ type: null, message: null })
   const [lastReceipt, setLastReceipt] = useState<ReceiptData | null>(null)
   const [description, setDescription] = useState('')
+  const [customer_name, setCustomerName] = useState('')
+  const [customer_phone, setCustomerPhone] = useState('')
 
   useEffect(() => {
     fetchItems()
@@ -137,6 +141,8 @@ export default function SalesPage() {
             totalPrice: item.price * item.quantity,
             description:
               description.trim() || `Sale by ${user?.username || 'Cashier'}`,
+            customer_name: customer_name.trim() || '',
+            customer_phone: customer_phone.trim() || '',
           }),
         }),
       )
@@ -151,10 +157,14 @@ export default function SalesPage() {
           cashier: user?.username || 'Cashier',
           receiptNo: `RCP-${Date.now()}`,
           description: description.trim(),
+          customer_name: customer_name.trim(),
+          customer_phone: customer_phone.trim(),
         }
         setLastReceipt(receipt)
         setCart([])
         setDescription('')
+        setCustomerName('')
+        setCustomerPhone('')
         showStatus('success', 'Sale completed successfully!')
         fetchItems()
       } else {
@@ -171,9 +181,12 @@ export default function SalesPage() {
     setLastReceipt(null)
     setCart([])
     setDescription('')
+    setCustomerName('')
+    setCustomerPhone('')
   }
 
   const generateReceiptHTML = (receipt: ReceiptData) => {
+    const logoUrl = `${window.location.origin}/logo.jpeg`
     return `
       <!DOCTYPE html>
       <html>
@@ -184,55 +197,195 @@ export default function SalesPage() {
             @page { size: 80mm auto; margin: 0; }
             body { margin: 0; padding: 0; }
           }
+          * { box-sizing: border-box; }
           body {
             font-family: 'Courier New', monospace;
             width: 80mm;
             margin: 0 auto;
-            padding: 10px;
+            padding: 12px;
             font-size: 12px;
-            line-height: 1.4;
+            line-height: 1.5;
+            color: #1a1a1a;
+            background: #fff;
           }
-          .receipt { border: 1px dashed #000; padding: 10px; }
-          .header { text-align: center; border-bottom: 1px dashed #000; padding-bottom: 10px; margin-bottom: 10px; }
-          .company-name { font-size: 18px; font-weight: bold; margin-bottom: 5px; }
-          .receipt-no { font-size: 11px; margin-top: 5px; }
-          .info { font-size: 11px; margin-bottom: 10px; }
-          .items { border-top: 1px dashed #000; border-bottom: 1px dashed #000; padding: 10px 0; margin: 10px 0; }
-          .item { display: flex; justify-content: space-between; margin-bottom: 5px; }
-          .item-name { flex: 1; }
-          .item-qty { width: 30px; text-align: center; }
-          .item-price { width: 60px; text-align: right; }
-          .totals { margin-top: 10px; }
-          .total-row { display: flex; justify-content: space-between; margin-bottom: 5px; }
-          .grand-total { font-size: 16px; font-weight: bold; border-top: 1px dashed #000; padding-top: 10px; margin-top: 10px; }
-          .footer { text-align: center; margin-top: 15px; font-size: 11px; border-top: 1px dashed #000; padding-top: 10px; }
+          .receipt {
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            padding: 14px;
+            background: #fff;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+          }
+          .header {
+            text-align: center;
+            padding-bottom: 12px;
+            margin-bottom: 12px;
+            border-bottom: 2px dashed #999;
+          }
+          .logo {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin: 0 auto 8px;
+            display: block;
+            border: 2px solid #4f46e5;
+          }
+          .company-name {
+            font-size: 20px;
+            font-weight: bold;
+            color: #4f46e5;
+            letter-spacing: 1px;
+            margin-bottom: 2px;
+          }
+          .company-sub { font-size: 10px; color: #666; margin-bottom: 6px; }
+          .receipt-no {
+            font-size: 11px;
+            background: #f0f0ff;
+            border: 1px solid #c7c7f5;
+            border-radius: 4px;
+            padding: 3px 8px;
+            display: inline-block;
+            color: #4f46e5;
+            font-weight: bold;
+            margin-top: 4px;
+          }
+          .section { margin-bottom: 10px; }
+          .section-title {
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #888;
+            margin-bottom: 4px;
+            font-weight: bold;
+          }
+          .info-grid { font-size: 11px; }
+          .info-row { display: flex; justify-content: space-between; margin-bottom: 2px; }
+          .info-label { color: #666; }
+          .info-value { font-weight: 600; color: #222; text-align: right; max-width: 55%; word-break: break-word; }
+          .customer-box {
+            background: #f9f9ff;
+            border: 1px solid #e0e0f5;
+            border-radius: 4px;
+            padding: 6px 8px;
+            margin-bottom: 10px;
+            font-size: 11px;
+          }
+          .items-table { width: 100%; border-collapse: collapse; margin: 0; }
+          .items-section {
+            border-top: 2px dashed #999;
+            border-bottom: 2px dashed #999;
+            padding: 8px 0;
+            margin: 10px 0;
+          }
+          .items-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #888;
+            font-weight: bold;
+            margin-bottom: 6px;
+            padding-bottom: 4px;
+            border-bottom: 1px solid #eee;
+          }
+          .item { display: flex; justify-content: space-between; margin-bottom: 5px; align-items: flex-start; }
+          .item-name { flex: 1; color: #222; }
+          .item-detail { font-size: 10px; color: #888; }
+          .item-qty { width: 28px; text-align: center; color: #555; }
+          .item-price { width: 62px; text-align: right; font-weight: 600; color: #222; }
+          .totals { margin-top: 4px; }
+          .total-row { display: flex; justify-content: space-between; margin-bottom: 4px; font-size: 12px; }
+          .total-label { color: #555; }
+          .total-value { font-weight: 600; }
+          .grand-total {
+            display: flex;
+            justify-content: space-between;
+            font-size: 15px;
+            font-weight: bold;
+            border-top: 2px solid #4f46e5;
+            padding-top: 8px;
+            margin-top: 8px;
+            color: #4f46e5;
+          }
+          .description-box {
+            background: #fffbeb;
+            border: 1px solid #fde68a;
+            border-radius: 4px;
+            padding: 5px 8px;
+            font-size: 11px;
+            margin-top: 8px;
+            color: #78350f;
+          }
+          .footer {
+            text-align: center;
+            margin-top: 14px;
+            font-size: 10px;
+            border-top: 1px dashed #ccc;
+            padding-top: 10px;
+            color: #666;
+          }
+          .footer-brand { font-weight: bold; color: #4f46e5; font-size: 12px; margin-top: 4px; }
+          .badge {
+            display: inline-block;
+            background: #4f46e5;
+            color: white;
+            font-size: 9px;
+            border-radius: 3px;
+            padding: 2px 6px;
+            margin-top: 4px;
+            letter-spacing: 0.5px;
+          }
         </style>
       </head>
       <body>
         <div class="receipt">
           <div class="header">
+            <img src="${logoUrl}" alt="Logo" class="logo" />
             <div class="company-name">Phone Fixer</div>
-            <div>Point of Sale System</div>
+            <div class="company-sub">Point of Sale System</div>
             <div class="receipt-no">Receipt #: ${receipt.receiptNo}</div>
           </div>
-          <div class="info">
-            <div>Date: ${new Date(receipt.date).toLocaleString()}</div>
-            <div>Cashier: ${receipt.cashier}</div>
-            ${receipt.description ? `<div style="margin-top: 5px;">Description: ${receipt.description}</div>` : ''}
-          </div>
-          <div class="items">
-            <div style="font-weight: bold; margin-bottom: 8px;">
-              <div class="item">
-                <div class="item-name">ITEM</div>
-                <div class="item-qty">QTY</div>
-                <div class="item-price">AMOUNT</div>
+
+          <div class="section">
+            <div class="section-title">Transaction Info</div>
+            <div class="info-grid">
+              <div class="info-row">
+                <span class="info-label">Date:</span>
+                <span class="info-value">${new Date(receipt.date).toLocaleString()}</span>
               </div>
+              <div class="info-row">
+                <span class="info-label">Cashier:</span>
+                <span class="info-value">${receipt.cashier}</span>
+              </div>
+            </div>
+          </div>
+
+          ${
+            receipt.customer_name || receipt.customer_phone
+              ? `
+          <div class="customer-box">
+            <div class="section-title" style="margin-bottom:4px;">Customer</div>
+            ${receipt.customer_name ? `<div class="info-row"><span class="info-label">Name:</span><span class="info-value" style="font-weight:600;">${receipt.customer_name}</span></div>` : ''}
+            ${receipt.customer_phone ? `<div class="info-row"><span class="info-label">Phone:</span><span class="info-value">${receipt.customer_phone}</span></div>` : ''}
+          </div>`
+              : ''
+          }
+
+          <div class="items-section">
+            <div class="items-header">
+              <span style="flex:1;">Item</span>
+              <span style="width:28px;text-align:center;">Qty</span>
+              <span style="width:62px;text-align:right;">Amount</span>
             </div>
             ${receipt.items
               .map(
                 (item) => `
               <div class="item">
-                <div class="item-name">${item.name}</div>
+                <div class="item-name">
+                  ${item.name}
+                  <div class="item-detail">Rs${item.price.toFixed(2)} each</div>
+                </div>
                 <div class="item-qty">${item.quantity}</div>
                 <div class="item-price">Rs${(item.price * item.quantity).toFixed(2)}</div>
               </div>
@@ -240,18 +393,28 @@ export default function SalesPage() {
               )
               .join('')}
           </div>
+
           <div class="totals">
             <div class="total-row">
-              <div>Subtotal:</div>
-              <div>Rs${receipt.total.toFixed(2)}</div>
+              <span class="total-label">Subtotal:</span>
+              <span class="total-value">Rs${receipt.total.toFixed(2)}</span>
             </div>
-            <div class="total-row grand-total">
-              <div>TOTAL:</div>
-              <div>Rs${receipt.total.toFixed(2)}</div>
+            <div class="total-row">
+              <span class="total-label">Tax:</span>
+              <span class="total-value">Rs0.00</span>
+            </div>
+            <div class="grand-total">
+              <span>TOTAL</span>
+              <span>Rs${receipt.total.toFixed(2)}</span>
             </div>
           </div>
+
+          ${receipt.description ? `<div class="description-box">Note: ${receipt.description}</div>` : ''}
+
           <div class="footer">
             <div>Thank you for your purchase!</div>
+            <div class="footer-brand">Phone Fixer</div>
+            <div class="badge">POS System</div>
           </div>
         </div>
       </body>
@@ -514,6 +677,24 @@ export default function SalesPage() {
                           placeholder="Enter description"
                           value={description}
                           onChange={(e) => setDescription(e.target.value)}
+                        />
+                        <h1 className="text-lg font-semibold">Customer Name</h1>
+                        <input
+                          type="text"
+                          className="w-full border border-gray-300 rounded px-3 py-2 mt-1"
+                          placeholder="Enter customer name"
+                          value={customer_name}
+                          onChange={(e) => setCustomerName(e.target.value)}
+                        />
+                        <h1 className="text-lg font-semibold">
+                          Customer Phone
+                        </h1>
+                        <input
+                          type="text"
+                          className="w-full border border-gray-300 rounded px-3 py-2 mt-1"
+                          placeholder="Enter customer phone"
+                          value={customer_phone}
+                          onChange={(e) => setCustomerPhone(e.target.value)}
                         />
                       </div>
                     </div>

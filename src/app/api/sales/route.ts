@@ -42,7 +42,7 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json()
-    const { item, quantity, description } = body
+    const { item, quantity, description, customer_name,customer_phone } = body
 
     // 1. Validate Item ID
     if (!item || !mongoose.Types.ObjectId.isValid(item)) {
@@ -72,6 +72,8 @@ export async function POST(req: NextRequest) {
       quantity,
       totalPrice,
       description,
+      customer_name,
+      customer_phone,
       status: 'active', // Ensure default status is set
     })
 

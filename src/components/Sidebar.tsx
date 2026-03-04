@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname, useRouter } from 'next/navigation'
 import {
   LayoutDashboard,
@@ -14,7 +15,6 @@ import {
   User,
 } from 'lucide-react'
 import { useUser } from '@/context/UserContext'
-import path from 'path'
 
 export default function Sidebar() {
   const { user, logout } = useUser()
@@ -44,13 +44,29 @@ export default function Sidebar() {
       {/* Header */}
       <div className="p-4 border-b flex items-center justify-between h-16">
         <div
-          className={`font-bold text-xl text-indigo-600 truncate ${!isSidebarOpen && 'hidden'}`}
+          className={`flex items-center gap-2 truncate ${!isSidebarOpen && 'hidden'}`}
         >
-          Phone Fixer
+          <Image
+            src="/logo.jpeg"
+            alt="Phone Fixer Logo"
+            width={36}
+            height={36}
+            className="rounded-full object-cover shrink-0"
+          />
+          <span className="font-bold text-xl text-indigo-600">Phone Fixer</span>
         </div>
+        {!isSidebarOpen && (
+          <Image
+            src="/logo.jpeg"
+            alt="Phone Fixer Logo"
+            width={36}
+            height={36}
+            className="rounded-full object-cover mx-auto"
+          />
+        )}
         <button
           onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-          className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500"
+          className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500 shrink-0"
         >
           {isSidebarOpen ? <X size={20} /> : <Menu size={20} />}
         </button>
