@@ -10,19 +10,25 @@ export default function MainLayout({
 }: {
   children: React.ReactNode
 }) {
-  const { isAuthenticated } = useUser()
+  const { isAuthenticated, loading } = useUser()
   const router = useRouter()
-  const [isMounted, setIsMounted] = React.useState(false)
 
   useEffect(() => {
-    setIsMounted(true)
-    if (!isAuthenticated) {
+    if (!loading && !isAuthenticated) {
       router.push('/sign-in')
     }
-  }, [router])
+  }, [loading, isAuthenticated, router])
 
-  // Prevent flash of content before auth check
-  if (!isMounted) return null
+  // Wait for auth check to complete before rendering or redirecting
+  if (loading) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-gray-100">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+      </div>
+    )
+  }
+
+  if (!isAuthenticated) return null
 
   return (
     <div className="flex h-screen bg-gray-100">
