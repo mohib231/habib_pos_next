@@ -8,6 +8,7 @@ export interface Sale extends Document {
   description?: string
   customer_name?: string
   customer_phone?: string
+  notes?: string
   status: 'active' | 'inactive'
   createdAt: Date
   updatedAt: Date
@@ -22,6 +23,7 @@ const salesSchema: Schema<Sale> = new Schema(
     description: { type: String },
     customer_name:{type:String},
     customer_phone:{type:String},
+    notes: { type: String },
     status: { type: String, enum: ['active', 'inactive'], default: 'active' },
   },
   { timestamps: true },

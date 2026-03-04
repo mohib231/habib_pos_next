@@ -28,6 +28,7 @@ interface ReceiptData {
   cashier: string
   receiptNo: string
   description?: string
+  notes?: string
   customer_name?: string
   customer_phone?: string
 }
@@ -46,6 +47,7 @@ export default function SalesPage() {
   const [description, setDescription] = useState('')
   const [customer_name, setCustomerName] = useState('')
   const [customer_phone, setCustomerPhone] = useState('')
+  const [notes, setNotes] = useState('')
 
   useEffect(() => {
     fetchItems()
@@ -143,6 +145,7 @@ export default function SalesPage() {
               description.trim() || `Sale by ${user?.username || 'Cashier'}`,
             customer_name: customer_name.trim() || '',
             customer_phone: customer_phone.trim() || '',
+            notes: notes.trim() || '',
           }),
         }),
       )
@@ -159,12 +162,14 @@ export default function SalesPage() {
           description: description.trim(),
           customer_name: customer_name.trim(),
           customer_phone: customer_phone.trim(),
+          notes: notes.trim(),
         }
         setLastReceipt(receipt)
         setCart([])
         setDescription('')
         setCustomerName('')
         setCustomerPhone('')
+        setNotes('')
         showStatus('success', 'Sale completed successfully!')
         fetchItems()
       } else {
@@ -183,6 +188,7 @@ export default function SalesPage() {
     setDescription('')
     setCustomerName('')
     setCustomerPhone('')
+    setNotes('')
   }
 
   const generateReceiptHTML = (receipt: ReceiptData) => {
@@ -309,10 +315,19 @@ export default function SalesPage() {
             color: #4f46e5;
           }
           .description-box {
+            background: #f0fdf4;
+            border: 1px solid #86efac;
+            border-radius: 4px;
+            padding: 6px 8px;
+            font-size: 11px;
+            margin-top: 2px;
+            color: #14532d;
+          }
+          .notes-box {
             background: #fffbeb;
             border: 1px solid #fde68a;
             border-radius: 4px;
-            padding: 5px 8px;
+            padding: 6px 8px;
             font-size: 11px;
             margin-top: 8px;
             color: #78350f;
@@ -359,6 +374,7 @@ export default function SalesPage() {
                 <span class="info-value">${receipt.cashier}</span>
               </div>
             </div>
+            ${receipt.description ? `<div class="description-box" style="margin-top:6px;"><strong>Service/Product:</strong> ${receipt.description}</div>` : ''}
           </div>
 
           ${
@@ -409,7 +425,7 @@ export default function SalesPage() {
             </div>
           </div>
 
-          ${receipt.description ? `<div class="description-box">Note: ${receipt.description}</div>` : ''}
+          ${receipt.notes ? `<div class="notes-box"><strong>Notes:</strong> ${receipt.notes}</div>` : ''}
 
           <div class="footer">
             <div>Thank you for your purchase!</div>
@@ -669,33 +685,68 @@ export default function SalesPage() {
                           Rs{calculateTotal().toFixed(2)}
                         </span>
                       </div>
-                      <div>
-                        <h1 className="text-lg font-semibold">Description</h1>
-                        <input
-                          type="text"
-                          className="w-full border border-gray-300 rounded px-3 py-2 mt-1"
-                          placeholder="Enter description"
-                          value={description}
-                          onChange={(e) => setDescription(e.target.value)}
-                        />
-                        <h1 className="text-lg font-semibold">Customer Name</h1>
-                        <input
-                          type="text"
-                          className="w-full border border-gray-300 rounded px-3 py-2 mt-1"
-                          placeholder="Enter customer name"
-                          value={customer_name}
-                          onChange={(e) => setCustomerName(e.target.value)}
-                        />
-                        <h1 className="text-lg font-semibold">
-                          Customer Phone
-                        </h1>
-                        <input
-                          type="text"
-                          className="w-full border border-gray-300 rounded px-3 py-2 mt-1"
-                          placeholder="Enter customer phone"
-                          value={customer_phone}
-                          onChange={(e) => setCustomerPhone(e.target.value)}
-                        />
+                      <div className="space-y-3 mt-3">
+                        {/* Description — about the product/service */}
+                        <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+                          <label className="block text-sm font-semibold text-green-800 mb-1">
+                            Service / Product Description
+                          </label>
+                          <p className="text-xs text-green-600 mb-1.5">
+                            What product or service is being sold?
+                          </p>
+                          <input
+                            type="text"
+                            className="w-full border border-green-300 rounded px-3 py-2 text-sm focus:ring-2 focus:ring-green-400 focus:border-green-400 outline-none bg-white"
+                            placeholder="e.g. Screen replacement, Phone repair…"
+                            value={description}
+                            onChange={(e) => setDescription(e.target.value)}
+                          />
+                        </div>
+
+                        {/* Customer Info */}
+                        <div className="grid grid-cols-2 gap-2">
+                          <div>
+                            <label className="block text-sm font-semibold text-gray-700 mb-1">
+                              Customer Name
+                            </label>
+                            <input
+                              type="text"
+                              className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-400 outline-none"
+                              placeholder="Full name"
+                              value={customer_name}
+                              onChange={(e) => setCustomerName(e.target.value)}
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-semibold text-gray-700 mb-1">
+                              Phone
+                            </label>
+                            <input
+                              type="text"
+                              className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-400 outline-none"
+                              placeholder="Number"
+                              value={customer_phone}
+                              onChange={(e) => setCustomerPhone(e.target.value)}
+                            />
+                          </div>
+                        </div>
+
+                        {/* Notes — additional shopkeeper remarks */}
+                        <div>
+                          <label className="block text-sm font-semibold text-gray-700 mb-1">
+                            Notes{' '}
+                            <span className="font-normal text-gray-400 text-xs">
+                              (additional remarks)
+                            </span>
+                          </label>
+                          <textarea
+                            rows={2}
+                            className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:ring-2 focus:ring-yellow-400 outline-none resize-none"
+                            placeholder="Any extra remarks for this sale…"
+                            value={notes}
+                            onChange={(e) => setNotes(e.target.value)}
+                          />
+                        </div>
                       </div>
                     </div>
 
