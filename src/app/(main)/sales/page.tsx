@@ -205,7 +205,7 @@ export default function SalesPage() {
           }
           * { box-sizing: border-box; }
           body {
-            font-family: 'Courier New', monospace;
+            font-family: Arial, sans-serif;
             width: 80mm;
             margin: 0 auto;
             padding: 12px;
