@@ -210,6 +210,7 @@ export default function SalesPage() {
             margin: 0 auto;
             padding: 12px;
             font-size: 12px;
+            font-weight: bold;
             line-height: 1.5;
             color: #1a1a1a;
             background: #fff;
